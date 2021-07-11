@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title> Tetris game </title>
+		<style>
+			body {
+				background-color: lightgray;
+			}
+			#box {
+				margin: auto;
+				top: 80px;
+				width: 300px;
+				height: 600px;
+				border: 2px solid black;
+				background-color: white;
+			}
+			#button {
+				background-color: white;
+				border: 2px solid blue;
+				color: blue;
+				margin-top: 20px;
+				margin-left: 44%;
+				margin-right: 44%;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				font-size: 20px;
+				font-weight: bold;
+			}
+			#button:hover {
+				background-color: blue;
+				border: 2px solid darkblue;
+				color: white;
+				margin-top: 20px;
+				margin-left: 44%;
+				margin-right: 44%;
+				padding: 15px 32px;
+				text-align: center;
+				text-decoration: none;
+				font-size: 20px;
+				font-weight: bold;
+			}
+		</style>
+		<script>
+			window.addEventListener("load", function() {
+				var box = document.getElementById("box");
+				var startBtn = document.getElementById("button");
+				var boxLength = 200;
+				var boxes = [];
+				var board = [];
+				var currentPos = [];
+				var checkingDivs = [];
+				var random = 0;
+				for(var i=0; i<boxLength; i++) {
+					boxes[i] = 0;
+					board[i] = 0;
+				}
+				
+				function playTetris() {
+					random = roll();
+					createShape();
+					startGoing();
+					window.addEventListener("keydown", function(keyPressed) {
+						if(keyPressed.keyCode == "39")
+							goRight();
+						else if(keyPressed.keyCode == "37")
+							goLeft();
+						else if(keyPressed.keyCode == "40")
+							goDown();
+					}, false);
+				}
+				
+				var divs = [];
+				
+				function Oshape(i) {	
+					divs[i].style.backgroundColor = "yellow";
+					
+					divs[i].style.marginLeft = parseInt((i%2)*30)+"px";
+					divs[i].style.marginTop = (parseInt(i/2))*30+"px";
+						
+					currentPos[i] = (i%2)+10*parseInt(i/2);
+					
+					checkingDivs[0] = [0,2];
+					checkingDivs[1] = [2,3];
+					checkingDivs[2] = [1,3];
+				}
+				
+				function Ishape(i) {
+					divs[i].style.backgroundColor = "cyan";
+					
+					divs[i].style.marginLeft = 0+"px";
+					divs[i].style.marginTop = i*30+"px";
+						
+					currentPos[i] = i*10;
+					
+					checkingDivs[0] = [0,1,2,3];
+					checkingDivs[1] = [3];
+					checkingDivs[2] = [0,1,2,3];
+				}
+				
+				function Lshape(i) {
+					divs[i].style.backgroundColor = "orange";
+					
+					divs[i].style.marginLeft = parseInt(i/3)*30+"px";
+					divs[i].style.marginTop = (i*30)-(parseInt(i/3)*30)+"px";
+						
+					currentPos[i] = (i*10)-(parseInt(i/3)*9);
+					
+					checkingDivs[0] = [0,1,2];
+					checkingDivs[1] = [2,3];
+					checkingDivs[2] = [0,1,3];
+				}
+				
+				function Jshape(i) {
+					divs[i].style.backgroundColor = "blue";
+					
+					divs[i].style.marginLeft = 30-(parseInt(i/3)*30)+"px";
+					divs[i].style.marginTop = (i*30)-(parseInt(i/3)*30)+"px";
+						
+					currentPos[i] = ((i*10)+1)-(parseInt(i/3)*11);
+					
+					checkingDivs[0] = [0,1,3];
+					checkingDivs[1] = [2,3];
+					checkingDivs[2] = [0,1,2];
+				}
+				
+				function Tshape(i) {
+					divs[i].style.backgroundColor = "purple";
+					
+					divs[i].style.marginLeft = (i*30)-(parseInt(i/3)*60)+"px";
+					divs[i].style.marginTop = parseInt(i/3)*30+"px";
+						
+					currentPos[i] = i+(parseInt(i/3)*8);
+					
+					checkingDivs[0] = [0,3];
+					checkingDivs[1] = [0,2,3];
+					checkingDivs[2] = [2,3];
+				}
+				
+				function Sshape(i) {
+					divs[i].style.backgroundColor = "green";
+					
+					divs[i].style.marginLeft = i*30 + 30 - parseInt(i/2)*90 +"px";
+					divs[i].style.marginTop = parseInt(i/2)*30+"px";
+						
+					currentPos[i] = parseInt(i/2)*10 + i - parseInt(i/2)*(3) + 1;
+					
+					checkingDivs[0] = [0,2];
+					checkingDivs[1] = [1,2,3];
+					checkingDivs[2] = [1,3];
+				}
+				
+				function Zshape(i) {
+					divs[i].style.backgroundColor = "red";
+					
+					divs[i].style.marginLeft = (i*30) - (parseInt(i/2)*30)+"px";
+					divs[i].style.marginTop = parseInt(i/2)*30+"px";
+						
+					currentPos[i] = parseInt(i/2)*10 + i - parseInt(i/2);
+					
+					checkingDivs[0] = [0,2];
+					checkingDivs[1] = [0,2,3];
+					checkingDivs[2] = [1,3];
+				}
+			
+				function createShape() {
+					var div1 = document.createElement("div");
+					var div2 = document.createElement("div");
+					var div3 = document.createElement("div");
+					var div4 = document.createElement("div");
+					divs = [div1, div2, div3, div4];
+					
+					for(var i=0; i<4; i++) {
+						divs[i].style.position = "absolute";
+						divs[i].style.border = "1px solid black"
+						divs[i].style.height = "30px";
+						divs[i].style.width = "30px";
+						
+						switch(random) {
+							case 0:
+								Oshape(i);
+								break;
+							case 1:
+								Ishape(i);
+								break;
+							case 2:
+								Lshape(i);
+								break;
+							case 3:
+								Jshape(i);
+								break;
+							case 4:
+								Tshape(i);
+								break;
+							case 5:
+								Sshape(i);
+								break;
+							case 6:
+								Zshape(i);
+								break;	
+						}
+						box.appendChild(divs[i]);
+					}
+					
+				}
+				
+				function roll() {
+					return Math.floor(Math.random() * 7);
+				}
+				
+				function initializePos() {
+					for(var i=0; i<4; i++) {
+						currentPos[i] = 0;
+					}
+				}
+				
+				var shiftedRows = [];
+				
+				function shiftRows() {
+					for(var i=0; i<shiftedRows.length; i++) {
+						for(k=shiftedRows[i]; k>=0; k--) {
+							board[k+10] = board[k];
+							board[k] = 0;
+							if(board[k+10] != 0) {
+								board[k+10].style.marginTop = parseInt(board[k+10].style.marginTop)+30+"px";
+							}		
+							boxes[k+10] = boxes[k];
+							shiftedRows.shift();
+						}
+					}
+				}
+					
+				function checkCompletedRows() {
+					var counter = 0;
+					for(var i=199; i>9; i--) {
+						if(i%10 == 9) {
+							counter = 0;
+						}
+						if(board[i] != 0) {
+							counter++;
+						}
+						if(counter == 10) {
+							for(var k=i; k<i+10; k++) {
+								board[k].parentNode.removeChild(board[k]);
+								board[k] = 0;
+							}
+							shiftedRows.push(i-1);
+							counter = 0;
+						}
+					}
+					shiftRows();
+				}
+				
+				function changeCurrentPos(dir) {
+					if(dir == "down") {
+						for(var i=0; i<4; i++) {
+							divs[i].style.marginTop = parseInt(divs[i].style.marginTop)+30+"px";
+							currentPos[i] = currentPos[i] + 10;
+						}
+					}
+					else if(dir == "left") {
+						for(var i=0; i<4; i++) {
+							divs[i].style.marginLeft = parseInt(divs[i].style.marginLeft)-30+"px";
+							currentPos[i] = currentPos[i] - 1;
+						}
+					}
+					else if(dir == "right") {
+						for(var i=0; i<4; i++) {
+							divs[i].style.marginLeft = parseInt(divs[i].style.marginLeft)+30+"px";
+							currentPos[i] = currentPos[i] + 1;
+						}
+					}
+				}
+				
+				function canMove(dir) {
+					if(dir == "down") {
+						for(var i=0; i<checkingDivs[1].length; i++) {
+							if(boxes[currentPos[checkingDivs[1][i]]+10] == 1 || currentPos[checkingDivs[1][i]] >= 190) {
+								return false;
+							}
+						}
+						return true;
+					}
+					else if(dir == "left") {
+						for(var i=0; i<checkingDivs[0].length; i++) {
+							if((currentPos[checkingDivs[0][i]]-1)%10 == 9 || boxes[currentPos[checkingDivs[0][i]]-1] == 1) {
+								return false;
+							}
+						}
+						return true;
+					}
+					else if(dir == "right") {
+						for(var i=0; i<checkingDivs[2].length; i++) {
+							if((currentPos[checkingDivs[2][i]]+1)%10 == 0 || boxes[currentPos[checkingDivs[2][i]]+1] == 1) {
+								return false;
+							}
+						}
+						return true;
+					}
+				}
+				
+				function startGoing() {
+					goDown();
+					setTimeout(startGoing, 500);					
+				}
+				
+				function goLeft() {
+					if(canMove("left")) {
+						changeCurrentPos("left");
+					}
+				}
+				
+				function goRight() {
+					if(canMove("right")) {
+						changeCurrentPos("right");
+					}
+				}
+				
+				function goDown() {
+					if(canMove("down")) {
+						changeCurrentPos("down");
+					}
+					else {
+						for(var i=0; i<4; i++) {
+							boxes[currentPos[i]] = 1;
+							board[currentPos[i]] = divs[i];
+						}
+						checkCompletedRows();
+						random = roll();
+						createShape();
+					}
+				}
+				
+				startBtn.addEventListener("click", function() {
+					startBtn.disabled=true;
+					playTetris();
+				});							
+			});	
+		</script>
+	</head>
+	<body>	
+		<div id="box">
+			
+		</div>
+		<div type="button" id="button">Start Game</div>
+	</body>
+</html>
